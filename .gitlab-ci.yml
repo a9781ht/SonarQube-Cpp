@@ -1,0 +1,25 @@
+variables:
+  NewCodeRefBranch:
+    value: $CI_DEFAULT_BRANCH
+    description: "Define New code for feature branch"
+
+stages:
+  - codecheck
+
+sonarqube:
+  stage: codecheck
+  image: registry.syntecclub.com/projectroot/cnc/buildmachine/cncwindowsbuildmachine:winserver_ltsc2022-2.latest
+  tags:
+    - "docker_windows"
+  variables:
+    GIT_DEPTH: 0
+  before_script:
+    - git config --global --add safe.directory '*'
+    - if( $(git rev-parse --is-shallow-repository) -eq $true ) { git fetch --unshallow }
+  script:
+    - cd $CI_PROJECT_DIR\Build
+    - cmd /c "SQAnalysis.bat"
+  artifacts:
+    name: "BuildLog_SonarQube"
+    when: always
+    untracked: true
